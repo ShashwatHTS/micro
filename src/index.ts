@@ -1,34 +1,46 @@
-import { createUserRoute } from "./routes/user.route";
+import { Express } from "express";
+import "reflect-metadata";
+import { db1, db2 } from "./migration/data-source";
+import express = require("express");
+import { userRouter } from "./routes/user.routes";
+import {orderRouter} from "./routes/order.routes"
 
-const { createConnection } = require("typeorm");
-const express = require('express')
-const app = express()
+const app: Express = express();
 
-const main = async () => {
-  try {
-    await createConnection({
-      type: "postgres",
-      host: "localhost",
-      port: 5432,
-      username: "postgres",
-      password: "102199",
-      database: "micro",
-      synchronize: true,
-        entities: ["src/entities/*.ts"],
+db1
+  .initialize()
+  .then(() => {
+    console.log("DB1 Source has been initialized!");
+
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: false }));
+    // app.use(cookieParser());
+
+    app.use("/", userRouter);
+
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
     });
-    console.log("connect to DB successfully");
+  })
+  .catch((err) => {
+    console.error("Error during Data Source initialization:", err);
+  });
 
-    app.use(express.json())
-    app.use(createUserRoute)
+db2
+  .initialize()
+  .then(() => {
+    console.log("DB2 Source has been initialized!");
 
-    app.listen(3000, ()=>{
-        console.log("listening on port 3000")
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: false }));
+    // app.use(cookieParser());
+
+    app.use("/", orderRouter);
+
+    app.listen(3001, () => {
+      console.log("Server is running on port 3001");
     });
-  } catch (error) {
-    console.log("connect to DB failed", error);
-    throw new Error(error);
-  }
-};
-
-main();
-
+  })
+  .catch((err) => {
+    console.error("Error during Data Source initialization:", err);
+  });
