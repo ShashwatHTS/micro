@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity({database:"db2"})
 export class Order {
   @PrimaryGeneratedColumn()
   id: number;
